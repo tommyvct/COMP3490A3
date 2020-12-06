@@ -132,16 +132,61 @@ public class App extends PApplet {
         // loads the textures, and call those from here.
     }
 
+
+    @Override
+    public void keyPressed() {
+        if (key == 'p')
+        {
+            println("fovy = " + fovy);
+            println("horizontalOffset = " + horizontalOffset);
+            println("verticalOffset = " + verticalOffset);
+        }
+        else if (key == 'd')
+        {
+            horizontalOffset += step;
+        }
+        else if (key == 'a')
+        {
+            horizontalOffset -= step;
+        }
+        else if (key == 'w')
+        {
+            verticalOffset += step;
+        }
+        else if (key == 's')
+        {
+            verticalOffset -= step;
+        }
+        else if (key == '+')
+        {
+            fovy += 0.04;
+        }
+        else if (key == '-')
+        {
+            fovy -= 0.04;
+        }
+    }
+
+    int step = 100;
+    int horizontalOffset = 0;
+    int verticalOffset = 0;
+
+    float fovy = 2.2689f; // 130 degree vertical fov
+
+
     public void draw() {
         // don't use resetMatrix to start. It clears the modelView matrix, which
         // includes your camera.
         // if you change the camera, you need to build the model again, so only do at
         // beginning of draw.
-        float fovy = 2.2689f; // 130 degree vertical fov
+
+        background(0);
 
         perspective(fovy, 1f, ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) / 10f,
                 ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) * 10f);
 
+        camera(width/2 +horizontalOffset, height/2 -verticalOffset, ((height / 2.0f) / tan(PI * 60.0f / 360.0f)), width/2 +horizontalOffset, height/2 -verticalOffset, 0, 0, 1, 0);
+        // TODO: experiment with camera param
         pushMatrix();
         pushMatrix();
 
