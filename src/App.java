@@ -22,7 +22,7 @@ public class App extends PApplet {
     }
 
     public void settings() {
-        size(640, 640, P3D);
+        size(500, 500, P3D);
     }
 
     // libJim.pde
@@ -99,9 +99,8 @@ public class App extends PApplet {
     boolean orthoMode = true;
 
     // Assignment3Handout.pde
-    void setup() {
-        size(1200, 1200, P3D);
-        colorMode(RGB, 1.0f);
+    public void setup() {
+        colorMode(RGB, 256f);
         textureMode(NORMAL); // uses normalized 0..1 texture coords
         textureWrap(CLAMP);
         // ONLY NEEDED FOR BONUS setupPOGL(); // setup our hack to ProcesingOpenGL to
@@ -115,11 +114,44 @@ public class App extends PApplet {
         // loads the textures, and call those from here.
     }
 
-    void draw() {
+    public void draw() {
         // don't use resetMatrix to start. It clears the modelView matrix, which
         // includes your camera.
         // if you change the camera, you need to build the model again, so only do at
         // beginning of draw.
+        float fovy = 2.2689f; // 130 degree vertical fov
+
+        perspective(fovy, 1f, ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) / 10f,
+                ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) * 10f);
+
+        pushMatrix();
+
+        // translate(0, 250, 0);
+        // rotateX(-PI/6);
+        // rotateY(PI/3);
+        pushMatrix();
+
+        for (int i = 0; i < 10; i++) {
+            popMatrix();
+            pushMatrix();
+            translate(0, 0, -50 * i);
+
+            for (int j = 0; j < 30; j++) {
+                fill(random(0, 255), random(0, 255), random(0, 255));
+                translate(50, 0, 0);
+                box(50);
+            }
+        }
+
+        // translate(50,0, 0);
+        // fill(random(0, 255), random(0, 255), random(0, 255));
+        // box(50);
+        // translate(50, 0, 50);
+        // fill(random(0, 255), random(0, 255), random(0, 255));
+        // box(50);
+
+        popMatrix();
+        popMatrix();
 
     }
 }
