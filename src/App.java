@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 import processing.core.*;
 import processing.data.*;
 import processing.event.*;
@@ -20,6 +22,14 @@ public class App extends PApplet {
             PApplet.main(appletArgs);
         }
     }
+
+
+    int floorDepth = 10;
+    int floorLength = 30;
+    float pillarDensity = 0.1f;
+    // {width, depth, h}
+    ArrayList<int[]> pillars = new ArrayList<>();
+    ArrayList<int[]> floorcolor = new ArrayList<>();
 
     public void settings() {
         size(500, 500, P3D);
@@ -108,6 +118,14 @@ public class App extends PApplet {
 
         // TODO: your setup code
 
+        for (int i = 0; i < floorDepth * floorLength; i++) {
+            floorcolor.add(new int[] {(int) random(0, 255), (int) random(0, 255), (int) random(0, 255)});
+        }
+
+        for (int i = 0; i < pillarDensity * floorDepth * floorLength; i++) {
+            pillars.add(new int[] {(int) random(1, floorDepth-1), (int) random(1, floorLength-1), (int) random(1, 6)});
+        }
+
         // WARNING: use loadImage to load any textures in setup or after. If you do it
         // globally / statically processing complains.
         // - just make a .setup or .init function on your world, player, etc., that
@@ -125,31 +143,42 @@ public class App extends PApplet {
                 ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) * 10f);
 
         pushMatrix();
-
-        // translate(0, 250, 0);
-        // rotateX(-PI/6);
-        // rotateY(PI/3);
         pushMatrix();
 
-        for (int i = 0; i < 10; i++) {
+        
+
+
+        for (int i = 0; i < floorDepth; i++) {
             popMatrix();
             pushMatrix();
             translate(0, 0, -50 * i);
+ 
+            for (int j = 0; j < floorLength; j++) {
+                int ij = i * floorDepth + j;
+                int h = 50;
+                fill(floorcolor.get(ij)[0], floorcolor.get(ij)[1], floorcolor.get(ij)[2]);
 
-            for (int j = 0; j < 30; j++) {
-                fill(random(0, 255), random(0, 255), random(0, 255));
+                for (int[] pillar : pillars) {
+                    if (pillar[0] == j && pillar[1] == i)
+                        h *= pillar[2];
+                }
+
+                if (h != 50)
+                {
+                    pushMatrix();
+                    translate(0, -(h - 50) / 2, 0);
+                    box(50, h, 50);
+                    popMatrix();
+                }
+                else
+                {
+                    box(50, h, 50);
+                }
                 translate(50, 0, 0);
-                box(50);
             }
         }
-
-        // translate(50,0, 0);
-        // fill(random(0, 255), random(0, 255), random(0, 255));
-        // box(50);
-        // translate(50, 0, 50);
-        // fill(random(0, 255), random(0, 255), random(0, 255));
-        // box(50);
-
+        
+    
         popMatrix();
         popMatrix();
 
