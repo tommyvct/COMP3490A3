@@ -116,8 +116,6 @@ public class App extends PApplet {
         // ONLY NEEDED FOR BONUS setupPOGL(); // setup our hack to ProcesingOpenGL to
         // let us modify the projection matrix manually
 
-        // TODO: your setup code
-
         for (int i = 0; i < floorDepth * floorLength; i++) {
             floorcolor.add(new int[] {(int) random(0, 255), (int) random(0, 255), (int) random(0, 255)});
         }
@@ -270,13 +268,16 @@ public class App extends PApplet {
         }
     }
 
-    int step = 50;
+    int step = 100;
 
     float fovy = 0.46890083f; //2.2689f; // 130 degree vertical fov
-    int xOffset = 300;
-    int yOffset = 800;
-    int zOffset = -400;
     float theta = 1.12f;
+    // int xOffset = 300;
+    // int yOffset = 800;
+    // int zOffset = -400;
+    int xOffset = 0;
+    int yOffset = 0;
+    int zOffset = 0;
 
 
     public void draw() {
@@ -290,16 +291,21 @@ public class App extends PApplet {
 
         if (orthoMode)
         {
-            ortho(); // TODO: ortho
+            ortho(-width/2, width/2, -height/2, height/2); // TODO: ortho
+            camera(width/2.0f + xOffset, height/2.0f - yOffset, 800 + zOffset,
+                width/2.0f + xOffset, height/2.0f - yOffset, 0 + zOffset, 
+                0, 1, 0);
+            // TODO
         }
         else
         {
             perspective(fovy, 1f, ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) / 20f,
                     ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) * 10f);
     
-            camera(xOffset, -yOffset, 450 -zOffset, 
-                xOffset, -yOffset + sin(theta) * 450, -zOffset - cos(theta) * 450, 
-                0, 1, 0);
+            // camera(xOffset, -yOffset, 450 -zOffset, 
+            //     xOffset, -yOffset + sin(theta) * 450, -zOffset - cos(theta) * 450, 
+            //     0, 1, 0);
+            camera(300f + xOffset, -800f, 850f, 300f + xOffset, -394.954800f, 203.942900f, 0f, 1f, 0f);
         }
         pushMatrix();
         pushMatrix();
