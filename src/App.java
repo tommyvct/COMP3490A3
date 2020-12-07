@@ -143,6 +143,10 @@ public class App extends PApplet {
             println("theta = " + theta);
             println();
         }
+        else if (key == KEY_VIEW)
+        {
+            orthoMode = !orthoMode;
+        }
         else if (key == '0')
         {
             xOffset = 0;
@@ -151,21 +155,21 @@ public class App extends PApplet {
             fovy = 1.5089006f;
             println("reset");
         }
-        else if (key == '1')
-        {
-            controlMode = 1;
-            println("control mode " + controlMode);
-        }
-        else if (key == '2')
-        {
-            controlMode = 2;
-            println("control mode " + controlMode);
-        }
-        else if (key == '3')
-        {
-            controlMode = 3;
-            println("control mode " + controlMode);
-        }
+        // else if (key == '1')
+        // {
+        //     controlMode = 1;
+        //     println("control mode " + controlMode);
+        // }
+        // else if (key == '2')
+        // {
+        //     controlMode = 2;
+        //     println("control mode " + controlMode);
+        // }
+        // else if (key == '3')
+        // {
+        //     controlMode = 3;
+        //     println("control mode " + controlMode);
+        // }
         else if (key == 'd')
         {
             // switch (controlMode) {
@@ -276,7 +280,7 @@ public class App extends PApplet {
     // int yOffset = 800;
     // int zOffset = -400;
     int xOffset = 0;
-    int yOffset = 0;
+    int yOffset = 475;
     int zOffset = 0;
 
 
@@ -291,11 +295,11 @@ public class App extends PApplet {
 
         if (orthoMode)
         {
-            ortho(-width/2, width/2, -height/2, height/2); // TODO: ortho
-            camera(width/2.0f + xOffset, height/2.0f - yOffset, 800 + zOffset,
-                width/2.0f + xOffset, height/2.0f - yOffset, 0 + zOffset, 
-                0, 1, 0);
-            // TODO
+            ortho(-width/2, width/2, -height/2, height/2);
+            // camera(width/2.0f + xOffset, height/2.0f - yOffset, 200,
+            //     width/2.0f + xOffset, height/2.0f - yOffset, 0, 
+            //     0, 1, 0);
+            camera(250 + xOffset, -225, 200, 250 + xOffset, -225, 0, 0, 1, 0);
         }
         else
         {
@@ -307,11 +311,10 @@ public class App extends PApplet {
             //     0, 1, 0);
             camera(300f + xOffset, -800f, 850f, 300f + xOffset, -394.954800f, 203.942900f, 0f, 1f, 0f);
         }
-        pushMatrix();
-        pushMatrix();
 
-        
 
+        pushMatrix();
+   
 
         for (int i = 0; i < floorDepth; i++) {
             popMatrix();
@@ -344,7 +347,6 @@ public class App extends PApplet {
         }
         
     
-        popMatrix();
         popMatrix();
 
     }
