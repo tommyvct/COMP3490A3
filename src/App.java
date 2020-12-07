@@ -26,8 +26,8 @@ public class App extends PApplet {
 
     int floorDepth = 10;
     int floorLength = 30;
-    float pillarDensity = 0.1f;
-    // {width, depth, h}
+    float pillarDensity = 0.05f;
+    // {x, z, h * 50}
     ArrayList<int[]> pillars = new ArrayList<>();
     ArrayList<int[]> floorcolor = new ArrayList<>();
 
@@ -123,7 +123,7 @@ public class App extends PApplet {
         }
 
         for (int i = 0; i < pillarDensity * floorDepth * floorLength; i++) {
-            pillars.add(new int[] {(int) random(1, floorDepth-1), (int) random(1, floorLength-1), (int) random(1, 6)});
+            pillars.add(new int[] {(int) random(0, floorDepth), (int) random(0, floorLength), (int) random(1, 5)});
         }
 
         // WARNING: use loadImage to load any textures in setup or after. If you do it
@@ -132,30 +132,125 @@ public class App extends PApplet {
         // loads the textures, and call those from here.
     }
 
+    int controlMode = 1;
 
     @Override
     public void keyPressed() {
         if (key == 'p')
         {
             println("fovy = " + fovy);
-            println("horizontalOffset = " + horizontalOffset);
-            println("verticalOffset = " + verticalOffset);
+            println("xOffset = " + xOffset);
+            println("yOffset = " + yOffset);
+            println("zOffset = " + zOffset);
+            println("theta = " + theta);
+            println();
+        }
+        else if (key == '0')
+        {
+            xOffset = 0;
+            yOffset = 0;
+            zOffset = 0;
+            fovy = 1.5089006f;
+            println("reset");
+        }
+        else if (key == '1')
+        {
+            controlMode = 1;
+            println("control mode " + controlMode);
+        }
+        else if (key == '2')
+        {
+            controlMode = 2;
+            println("control mode " + controlMode);
+        }
+        else if (key == '3')
+        {
+            controlMode = 3;
+            println("control mode " + controlMode);
         }
         else if (key == 'd')
         {
-            horizontalOffset += step;
+            // switch (controlMode) {
+            //     case 1:
+                    xOffset += step;
+            //         break;
+            //     case 2:
+            //         centreXoffset += step;
+            //         break;
+            //     case 3:
+            //         xOffset += step;
+            //         centreXoffset += step;
+            // }
         }
         else if (key == 'a')
         {
-            horizontalOffset -= step;
+            // switch (controlMode) {
+            //     case 1:
+                    xOffset -= step;
+            //         break;
+            //     case 2:
+            //         centreXoffset -= step;
+            //         break;
+            //     case 3:
+            //         xOffset -= step;
+            //         centreXoffset -= step;
+            // }
         }
         else if (key == 'w')
         {
-            verticalOffset += step;
+            // switch (controlMode) {
+            //     case 1:
+                    yOffset += step;
+            //         break;
+            //     case 2:
+            //         centreYoffset += step;
+            //         break;
+            //     case 3:
+            //         yOffset += step;
+            //         centreYoffset += step;
+            // }
         }
         else if (key == 's')
         {
-            verticalOffset -= step;
+            // switch (controlMode) {
+            //     case 1:
+                    yOffset -= step;
+            //         break;
+            //     case 2:
+            //         centreYoffset -= step;
+            //         break;
+            //     case 3:
+            //         yOffset -= step;
+            //         centreYoffset -= step;
+            // }
+        }
+        else if (key == 'e')
+        {
+            // switch (controlMode) {
+            //     case 1:
+                    zOffset += step;
+            //         break;
+            //     case 2:
+            //         centreZoffset += step;
+            //         break;
+            //     case 3:
+            //         zOffset += step;
+            //         centreZoffset += step;
+            // }
+        }
+        else if (key == 'q')
+        {
+            // switch (controlMode) {
+            //     case 1:
+                    zOffset -= step;
+            //         break;
+            //     case 2:
+            //         centreZoffset -= step;
+            //         break;
+            //     case 3:
+            //         zOffset -= step;
+            //         centreZoffset -= step;
+            // }
         }
         else if (key == '+')
         {
@@ -165,13 +260,23 @@ public class App extends PApplet {
         {
             fovy -= 0.04;
         }
+        else if (key == ']')
+        {
+            theta += 0.04;
+        }
+        else if (key == '[')
+        {
+            theta -= 0.04;
+        }
     }
 
-    int step = 100;
-    int horizontalOffset = 0;
-    int verticalOffset = 0;
+    int step = 50;
 
-    float fovy = 2.2689f; // 130 degree vertical fov
+    float fovy = 0.46890083f; //2.2689f; // 130 degree vertical fov
+    int xOffset = 300;
+    int yOffset = 800;
+    int zOffset = -400;
+    float theta = 1.12f;
 
 
     public void draw() {
@@ -181,12 +286,21 @@ public class App extends PApplet {
         // beginning of draw.
 
         background(0);
+        stroke(255);
 
-        perspective(fovy, 1f, ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) / 10f,
-                ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) * 10f);
-
-        camera(width/2 +horizontalOffset, height/2 -verticalOffset, ((height / 2.0f) / tan(PI * 60.0f / 360.0f)), width/2 +horizontalOffset, height/2 -verticalOffset, 0, 0, 1, 0);
-        // TODO: experiment with camera param
+        if (orthoMode)
+        {
+            ortho(); // TODO: ortho
+        }
+        else
+        {
+            perspective(fovy, 1f, ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) / 20f,
+                    ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) * 10f);
+    
+            camera(xOffset, -yOffset, 450 -zOffset, 
+                xOffset, -yOffset + sin(theta) * 450, -zOffset - cos(theta) * 450, 
+                0, 1, 0);
+        }
         pushMatrix();
         pushMatrix();
 
@@ -204,7 +318,7 @@ public class App extends PApplet {
                 fill(floorcolor.get(ij)[0], floorcolor.get(ij)[1], floorcolor.get(ij)[2]);
 
                 for (int[] pillar : pillars) {
-                    if (pillar[0] == j && pillar[1] == i)
+                    if (pillar[0] == i && pillar[1] == j)
                         h *= pillar[2];
                 }
 
