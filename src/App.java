@@ -106,7 +106,7 @@ public class App extends PApplet {
     boolean doCollision = false;
 
     // false is perspective mode.
-    boolean orthoMode = true;
+    boolean orthoMode = false;
 
     // Assignment3Handout.pde
     public void setup() {
@@ -136,152 +136,154 @@ public class App extends PApplet {
     public void keyPressed() {
         if (key == 'p')
         {
-            println("fovy = " + fovy);
-            println("xOffset = " + xOffset);
-            println("yOffset = " + yOffset);
-            println("zOffset = " + zOffset);
-            println("theta = " + theta);
-            println();
+            // println("xOffset = " + xOffset);
+            // println("yOffset = " + yOffset);
+            // println("zOffset = " + zOffset);
+            // println();
         }
         else if (key == KEY_VIEW)
         {
             orthoMode = !orthoMode;
         }
-        else if (key == '0')
+        else if (key == KEY_RIGHT)
         {
-            xOffset = 0;
-            yOffset = 0;
-            zOffset = 0;
-            fovy = 1.5089006f;
-            println("reset");
+            keyRight = true;
         }
-        // else if (key == '1')
+        else if (key == KEY_LEFT)
+        {
+            keyLeft = true;
+        }
+        else if (key == KEY_UP)
+        {
+            keyUp = true;
+        }
+        else if (key == KEY_DOWN)
+        {
+            keyDown = true;
+        }
+        else if (key == KEY_JUMP)
+        {
+            keyJump = true;
+        }
+        // else if (key == '0')
         // {
-        //     controlMode = 1;
-        //     println("control mode " + controlMode);
+        //     xOffset = 0;
+        //     yOffset = 0;
+        //     zOffset = 0;
+        //     println("reset");
         // }
-        // else if (key == '2')
-        // {
-        //     controlMode = 2;
-        //     println("control mode " + controlMode);
-        // }
-        // else if (key == '3')
-        // {
-        //     controlMode = 3;
-        //     println("control mode " + controlMode);
-        // }
-        else if (key == 'd')
-        {
-            // switch (controlMode) {
-            //     case 1:
-                    xOffset += step;
-            //         break;
-            //     case 2:
-            //         centreXoffset += step;
-            //         break;
-            //     case 3:
-            //         xOffset += step;
-            //         centreXoffset += step;
-            // }
-        }
-        else if (key == 'a')
-        {
-            // switch (controlMode) {
-            //     case 1:
-                    xOffset -= step;
-            //         break;
-            //     case 2:
-            //         centreXoffset -= step;
-            //         break;
-            //     case 3:
-            //         xOffset -= step;
-            //         centreXoffset -= step;
-            // }
-        }
-        else if (key == 'w')
-        {
-            // switch (controlMode) {
-            //     case 1:
-                    yOffset += step;
-            //         break;
-            //     case 2:
-            //         centreYoffset += step;
-            //         break;
-            //     case 3:
-            //         yOffset += step;
-            //         centreYoffset += step;
-            // }
-        }
-        else if (key == 's')
-        {
-            // switch (controlMode) {
-            //     case 1:
-                    yOffset -= step;
-            //         break;
-            //     case 2:
-            //         centreYoffset -= step;
-            //         break;
-            //     case 3:
-            //         yOffset -= step;
-            //         centreYoffset -= step;
-            // }
-        }
-        else if (key == 'e')
-        {
-            // switch (controlMode) {
-            //     case 1:
-                    zOffset += step;
-            //         break;
-            //     case 2:
-            //         centreZoffset += step;
-            //         break;
-            //     case 3:
-            //         zOffset += step;
-            //         centreZoffset += step;
-            // }
-        }
-        else if (key == 'q')
-        {
-            // switch (controlMode) {
-            //     case 1:
-                    zOffset -= step;
-            //         break;
-            //     case 2:
-            //         centreZoffset -= step;
-            //         break;
-            //     case 3:
-            //         zOffset -= step;
-            //         centreZoffset -= step;
-            // }
-        }
-        else if (key == '+')
-        {
-            fovy += 0.04;
-        }
-        else if (key == '-')
-        {
-            fovy -= 0.04;
-        }
-        else if (key == ']')
-        {
-            theta += 0.04;
-        }
-        else if (key == '[')
-        {
-            theta -= 0.04;
-        }
     }
 
-    int step = 100;
+    @Override
+    public void keyReleased() {
+        if (key == KEY_RIGHT)
+        {
+            keyRight = false;
+        }
+        else if (key == KEY_LEFT)
+        {
+            keyLeft = false;
+        }
+        else if (key == KEY_UP)
+        {
+            keyUp = false;
+        }
+        else if (key == KEY_DOWN)
+        {
+            keyDown = false;
+        }
+        else if (key == KEY_JUMP)
+        {
+            keyJump = false;
+        }
 
-    float fovy = 0.46890083f; //2.2689f; // 130 degree vertical fov
-    float theta = 1.12f;
-    // int xOffset = 300;
-    // int yOffset = 800;
-    // int zOffset = -400;
-    int xOffset = 0;
-    int yOffset = 475;
-    int zOffset = 0;
+    }
+
+
+    void pollKeys()
+    {
+        final int speedLimit = 5;
+        final int speedIncrement = 2;
+        final float inertia = 0.8f;
+
+        if (keyRight)
+        {
+            xSpeed += speedIncrement;
+        }
+        else if (keyLeft)
+        {
+            xSpeed -= speedIncrement;
+        }
+        else
+        {
+            xSpeed *= inertia;
+        }
+
+        if (keyUp)
+        {
+            zSpeed += speedIncrement;
+        }
+        else if (keyDown)
+        {
+            zSpeed -= speedIncrement;
+        }
+        else
+        {
+            zSpeed *= inertia;
+        }
+
+        if (keyJump && !jumpCoolDown)
+        {
+            ySpeed += 10;
+            jumpCoolDown = true; // TODO: deal with it
+        }
+        else
+        {
+            ySpeed -= 10;
+        }
+
+        xPos += xSpeed;
+        yPos += ySpeed;
+        zPos += zSpeed;
+
+        xSpeed = constrain(xSpeed, -speedLimit, speedLimit);
+        ySpeed = constrain(ySpeed, -5, 5);
+        zSpeed = constrain(zSpeed, -speedLimit, speedLimit);
+        xPos = constrain(xPos, -300, -300 + (floorLength - 1) * 50);
+        yPos = constrain(yPos, 0, 150);
+        zPos = constrain(zPos, 0, (floorDepth - 1) * 50);
+        
+        // if (xPos < -300)
+        // {
+        //     xPos = -300;
+        // }
+        // if (xPos > -300 + (floorLength - 1) * 50)
+        // {
+        //     xPos = -300 + (floorLength - 1) * 50;
+        // }
+
+        // if (zPos < 0)
+        // {
+        //     zPos = 0;
+        // }
+        // if (zPos > (floorDepth - 1) * 50)
+        // {
+        //     zPos = (floorDepth - 1) * 50;
+        // }
+
+
+    }
+
+
+    int step = 50;
+
+    float xPos = 0;
+    float yPos = 0;
+    float zPos = 0;
+    float xSpeed = 0f;
+    float ySpeed = 0f; // for jump
+    float zSpeed = 0f;
+    boolean jumpCoolDown = false;
 
 
     public void draw() {
@@ -293,23 +295,25 @@ public class App extends PApplet {
         background(0);
         stroke(255);
 
+        pollKeys();
+
         if (orthoMode)
         {
             ortho(-width/2, width/2, -height/2, height/2);
             // camera(width/2.0f + xOffset, height/2.0f - yOffset, 200,
             //     width/2.0f + xOffset, height/2.0f - yOffset, 0, 
             //     0, 1, 0);
-            camera(250 + xOffset, -225, 200, 250 + xOffset, -225, 0, 0, 1, 0);
+            camera(250 + xPos, -225, 200, 250 + xPos, -225, 0, 0, 1, 0);
         }
         else
         {
-            perspective(fovy, 1f, ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) / 20f,
+            perspective(0.46890083f, 1f, ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) / 10f,
                     ((height / 2.0f) / tan(PI * 60.0f / 360.0f)) * 10f);
     
             // camera(xOffset, -yOffset, 450 -zOffset, 
             //     xOffset, -yOffset + sin(theta) * 450, -zOffset - cos(theta) * 450, 
             //     0, 1, 0);
-            camera(300f + xOffset, -800f, 850f, 300f + xOffset, -394.954800f, 203.942900f, 0f, 1f, 0f);
+            camera(300f + xPos, -800f, 850f, 300f + xPos, -394.954800f, 203.942900f, 0f, 1f, 0f);
         }
 
 
@@ -325,6 +329,7 @@ public class App extends PApplet {
                 int ij = i * floorDepth + j;
                 int h = 50;
                 fill(floorcolor.get(ij)[0], floorcolor.get(ij)[1], floorcolor.get(ij)[2]);
+                // fill(50);
 
                 for (int[] pillar : pillars) {
                     if (pillar[0] == i && pillar[1] == j)
@@ -347,6 +352,18 @@ public class App extends PApplet {
         }
         
     
+        popMatrix();
+
+
+        // interactive character
+        pushMatrix();
+
+        translate(300 +xPos, -50 -yPos, 0 -zPos);
+
+        stroke(255, 0, 0);
+        fill(255);
+        box(50, 50, 50);
+
         popMatrix();
 
     }
