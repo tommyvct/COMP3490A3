@@ -108,13 +108,18 @@ public class App extends PApplet {
     // false is perspective mode.
     boolean orthoMode = false;
 
+    PImage brick;
+    PImage pillar;
+
     // Assignment3Handout.pde
     public void setup() {
         colorMode(RGB, 256f);
         textureMode(NORMAL); // uses normalized 0..1 texture coords
-        textureWrap(CLAMP);
+        textureWrap(REPEAT);
         // ONLY NEEDED FOR BONUS setupPOGL(); // setup our hack to ProcesingOpenGL to
         // let us modify the projection matrix manually
+        brick = loadImage("res/brick0.png");
+        pillar = loadImage("res/pillar.png");
 
         for (int i = 0; i < floorDepth * floorLength; i++) {
             floorcolor.add(new int[] {(int) random(0, 255), (int) random(0, 255), (int) random(0, 255)});
@@ -232,10 +237,10 @@ public class App extends PApplet {
             zSpeed *= inertia;
         }
 
-        if (keyJump && !jumpCoolDown)
+        if (keyJump)
         {
+            keyJump = yPos > 149f ? false : keyJump; // TODO: jump in mid-air?
             ySpeed += 10;
-            jumpCoolDown = true; // TODO: deal with it
         }
         else
         {
@@ -252,26 +257,6 @@ public class App extends PApplet {
         xPos = constrain(xPos, -300, -300 + (floorLength - 1) * 50);
         yPos = constrain(yPos, 0, 150);
         zPos = constrain(zPos, 0, (floorDepth - 1) * 50);
-        
-        // if (xPos < -300)
-        // {
-        //     xPos = -300;
-        // }
-        // if (xPos > -300 + (floorLength - 1) * 50)
-        // {
-        //     xPos = -300 + (floorLength - 1) * 50;
-        // }
-
-        // if (zPos < 0)
-        // {
-        //     zPos = 0;
-        // }
-        // if (zPos > (floorDepth - 1) * 50)
-        // {
-        //     zPos = (floorDepth - 1) * 50;
-        // }
-
-
     }
 
 
@@ -284,6 +269,69 @@ public class App extends PApplet {
     float ySpeed = 0f; // for jump
     float zSpeed = 0f;
     boolean jumpCoolDown = false;
+
+
+    /**
+     * modded based on https://github.com/processing/processing/blob/4cc297c66908899cd29480c202536ecf749854e8/core/src/processing/core/PGraphics.java
+     * 
+     * @param w dimension of the box in the x-dimension
+     * @param h dimension of the box in the y-dimension
+     * @param d dimension of the box in the z-dimension
+     * @param image texture image
+     */
+    public void textureBox(float w, float h, float d, PImage image) {
+        float x1 = -w/2f; float x2 = w/2f;
+        float y1 = -h/2f; float y2 = h/2f;
+        float z1 = -d/2f; float z2 = d/2f;
+
+
+        beginShape(QUADS);
+        texture(image);
+
+        // front
+        normal(0, 0, 1);
+        vertex(x1, y1, z1, 0, 0); // upperleft
+        vertex(x2, y1, z1, 1, 0); // upperright
+        vertex(x2, y2, z1, 1, h/50); // lowerright
+        vertex(x1, y2, z1, 0, h/50); // lowerleft
+
+        // right
+        normal(1, 0, 0);
+        vertex(x2, y1, z1, 0, 0); // upperleft
+        vertex(x2, y1, z2, 1, 0); // upperright
+        vertex(x2, y2, z2, 1, h/50); // lowerright
+        vertex(x2, y2, z1, 0, h/50); // lowerleft
+
+        // back
+        normal(0, 0, -1);
+        vertex(x2, y1, z2, 0, 0); // upperleft
+        vertex(x1, y1, z2, 1, 0); // upperright
+        vertex(x1, y2, z2, 1, h/50); // lowerright
+        vertex(x2, y2, z2, 0, h/50); // lowerleft
+
+        // left
+        normal(-1, 0, 0);
+        vertex(x1, y1, z2, 0, 0); // upperleft
+        vertex(x1, y1, z1, 1, 0); // upperright
+        vertex(x1, y2, z1, 1, h/50); // lowerright
+        vertex(x1, y2, z2, 0, h/50); // lowerleft
+
+        // top
+        normal(0, 1, 0);
+        vertex(x1, y1, z2, 0, 0); // upperleft
+        vertex(x2, y1, z2, 1, 0); // upperright
+        vertex(x2, y1, z1, 1, 1); // lowerright
+        vertex(x1, y1, z1, 0, 1); // lowerleft
+
+        // bottom
+        normal(0, -1, 0);
+        vertex(x1, y2, z1, 0, 0); // upperleft
+        vertex(x2, y2, z1, 1, 0); // upperright
+        vertex(x2, y2, z2, 1, 1); // lowerright
+        vertex(x1, y2, z2, 0, 1); // lowerleft
+
+        endShape();
+    }
 
 
     public void draw() {
@@ -340,12 +388,12 @@ public class App extends PApplet {
                 {
                     pushMatrix();
                     translate(0, -(h - 50) / 2, 0);
-                    box(50, h, 50);
+                    textureBox(50, h, 50, pillar);
                     popMatrix();
                 }
                 else
                 {
-                    box(50, h, 50);
+                    textureBox(50, h, 50, brick);
                 }
                 translate(50, 0, 0);
             }
@@ -356,6 +404,7 @@ public class App extends PApplet {
 
 
         // interactive character
+        // TODO: character frame based animation
         pushMatrix();
 
         translate(300 +xPos, -50 -yPos, 0 -zPos);
@@ -365,6 +414,5 @@ public class App extends PApplet {
         box(50, 50, 50);
 
         popMatrix();
-
     }
 }
