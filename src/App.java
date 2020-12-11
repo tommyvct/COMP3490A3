@@ -180,6 +180,10 @@ public class App extends PApplet {
             if (!isJumping())
                 keyJump = true;
         }
+        else if (key == KEY_TEX)
+        {
+            doTextures = !doTextures;
+        }
     }
 
     @Override
@@ -408,24 +412,30 @@ public class App extends PApplet {
             for (int j = 0; j < FLOOR_LENGTH; j++) {
                 int ij = i * FLOOR_DEPTH + j;
                 int h = BLOCK_SIZE;
-                fill(floorcolor.get(ij)[0], floorcolor.get(ij)[1], floorcolor.get(ij)[2]);
-                // fill(50);
+                if (!doTextures)
+                    fill(floorcolor.get(ij)[0], floorcolor.get(ij)[1], floorcolor.get(ij)[2]);
 
                 for (int[] pillar : pillars) {
                     if (pillar[0] == i && pillar[1] == j)
                         h *= pillar[2];
                 }
 
-                if (h != BLOCK_SIZE)
+                if (h != BLOCK_SIZE) // pillars
                 {
                     pushMatrix();
                     translate(0, -(h - BLOCK_SIZE) / 2, 0);
-                    textureBox(BLOCK_SIZE, h, BLOCK_SIZE, pillar);
+                    if (doTextures)
+                        textureBox(BLOCK_SIZE, h, BLOCK_SIZE, pillar);
+                    else
+                        box(BLOCK_SIZE, h, BLOCK_SIZE);
                     popMatrix();
                 }
                 else
                 {
-                    textureBox(BLOCK_SIZE, h, BLOCK_SIZE, brick);
+                    if (doTextures)
+                        textureBox(BLOCK_SIZE, h, BLOCK_SIZE, brick);
+                    else
+                        box(BLOCK_SIZE, h, BLOCK_SIZE);
                 }
                 translate(BLOCK_SIZE, 0, 0);
             }
@@ -448,40 +458,48 @@ public class App extends PApplet {
         
         translate(300 +xPos, -BLOCK_SIZE -yPos, 0 -zPos);
         
-        // TODO: character frame based animation
         // stroke(255, 0, 0);
         // fill(255);
         // box(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-        lerpProgress += facingRight ? +10 : -10;
-        lerpProgress = constrain(lerpProgress, 0, 100);
-        
-        PImage mario;
-
-        if (jumping)
+        if (doTextures)
         {
-            mario = marioJump;
-            marioWalkIndex = 0;
-        }
-        else
-        {
-            if (abs(xSpeed) > 0.2)
+            lerpProgress += facingRight ? +10 : -10;
+            lerpProgress = constrain(lerpProgress, 0, 100);
+            
+            PImage mario;
+    
+            if (jumping)
             {
-                mario = marioWalk[marioWalkIndex];
-
-                if (millis() - marioWalkAnimationTimer >= 250)
-                {
-                    marioWalkIndex = ++marioWalkIndex % 3;
-                    marioWalkAnimationTimer = millis();
-                }
+                mario = marioJump;
+                marioWalkIndex = 0;
             }
             else
             {
-                marioWalkIndex = 0;
-                mario = marioStatic;
+                if (abs(xSpeed) > 0.2)
+                {
+                    mario = marioWalk[marioWalkIndex];
+    
+                    if (millis() - marioWalkAnimationTimer >= 250)
+                    {
+                        marioWalkIndex = ++marioWalkIndex % 3;
+                        marioWalkAnimationTimer = millis();
+                    }
+                }
+                else
+                {
+                    marioWalkIndex = 0;
+                    mario = marioStatic;
+                }
             }
+    
+            drawMario(lerpProgress /100f, mario);
         }
-
-        drawMario(lerpProgress /100f, mario);
+        else
+        {
+            stroke(255, 0, 0);
+            fill(255);
+            box(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        }
 
         popMatrix();
     }
