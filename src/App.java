@@ -24,10 +24,11 @@ public class App extends PApplet {
     }
 
 
-    int floorDepth = 10;
-    int floorLength = 30;
-    float pillarDensity = 0.05f;
-    // {x, z, h * 50}
+    final int FLOOR_DEPTH = 10;
+    final int FLOOR_LENGTH = 30;
+    final int BLOCK_SIZE = 50;
+    final float PILLAR_DENSITY = 0.05f;
+    // {x, z, h * BLOCK_SIZE}
     ArrayList<int[]> pillars = new ArrayList<>();
     ArrayList<int[]> floorcolor = new ArrayList<>();
 
@@ -111,6 +112,12 @@ public class App extends PApplet {
     PImage brick;
     PImage pillar;
 
+    PImage marioStatic;
+    int marioWalkIndex;
+    int marioWalkAnimationTimer;
+    PImage[] marioWalk;
+    PImage marioJump;
+
     // Assignment3Handout.pde
     public void setup() {
         colorMode(RGB, 256f);
@@ -121,12 +128,23 @@ public class App extends PApplet {
         brick = loadImage("res/brick0.png");
         pillar = loadImage("res/pillar.png");
 
-        for (int i = 0; i < floorDepth * floorLength; i++) {
+        marioStatic = loadImage("res/static.png");
+        marioWalk = new PImage[]
+        {
+            loadImage("res/walk1.png"),
+            loadImage("res/walk2.png"),
+            loadImage("res/walk3.png")
+        };
+        marioWalkIndex = 0;
+        marioWalkAnimationTimer = millis();
+        marioJump = loadImage("res/jump.png");
+
+        for (int i = 0; i < FLOOR_DEPTH * FLOOR_LENGTH; i++) {
             floorcolor.add(new int[] {(int) random(0, 255), (int) random(0, 255), (int) random(0, 255)});
         }
 
-        for (int i = 0; i < pillarDensity * floorDepth * floorLength; i++) {
-            pillars.add(new int[] {(int) random(0, floorDepth), (int) random(0, floorLength), (int) random(1, 5)});
+        for (int i = 0; i < PILLAR_DENSITY * FLOOR_DEPTH * FLOOR_LENGTH; i++) {
+            pillars.add(new int[] {(int) random(0, FLOOR_DEPTH), (int) random(0, FLOOR_LENGTH), (int) random(1, 5)});
         }
 
         // WARNING: use loadImage to load any textures in setup or after. If you do it
@@ -135,18 +153,9 @@ public class App extends PApplet {
         // loads the textures, and call those from here.
     }
 
-    int controlMode = 1;
-
     @Override
     public void keyPressed() {
-        if (key == 'p')
-        {
-            // println("xOffset = " + xOffset);
-            // println("yOffset = " + yOffset);
-            // println("zOffset = " + zOffset);
-            // println();
-        }
-        else if (key == KEY_VIEW)
+        if (key == KEY_VIEW)
         {
             orthoMode = !orthoMode;
         }
@@ -168,15 +177,9 @@ public class App extends PApplet {
         }
         else if (key == KEY_JUMP)
         {
-            keyJump = true;
+            if (!isJumping())
+                keyJump = true;
         }
-        // else if (key == '0')
-        // {
-        //     xOffset = 0;
-        //     yOffset = 0;
-        //     zOffset = 0;
-        //     println("reset");
-        // }
     }
 
     @Override
@@ -199,7 +202,8 @@ public class App extends PApplet {
         }
         else if (key == KEY_JUMP)
         {
-            keyJump = false;
+            if (!isJumping())
+                keyJump = false;
         }
 
     }
@@ -239,7 +243,7 @@ public class App extends PApplet {
 
         if (keyJump)
         {
-            keyJump = yPos > 149f ? false : keyJump; // TODO: jump in mid-air?
+            keyJump = yPos > 149f ? false : keyJump;
             ySpeed += 10;
         }
         else
@@ -254,13 +258,13 @@ public class App extends PApplet {
         xSpeed = constrain(xSpeed, -speedLimit, speedLimit);
         ySpeed = constrain(ySpeed, -5, 5);
         zSpeed = constrain(zSpeed, -speedLimit, speedLimit);
-        xPos = constrain(xPos, -300, -300 + (floorLength - 1) * 50);
+        xPos = constrain(xPos, -300, -300 + (FLOOR_LENGTH - 1) * BLOCK_SIZE);
         yPos = constrain(yPos, 0, 150);
-        zPos = constrain(zPos, 0, (floorDepth - 1) * 50);
+        zPos = constrain(zPos, 0, (FLOOR_DEPTH - 1) * BLOCK_SIZE);
     }
 
 
-    int step = 50;
+    int step = BLOCK_SIZE;
 
     float xPos = 0;
     float yPos = 0;
@@ -269,7 +273,10 @@ public class App extends PApplet {
     float ySpeed = 0f; // for jump
     float zSpeed = 0f;
     boolean jumpCoolDown = false;
+    boolean facingRight = true;
+    boolean jumping = false;
 
+    int lerpProgress = 100;
 
     /**
      * modded based on https://github.com/processing/processing/blob/4cc297c66908899cd29480c202536ecf749854e8/core/src/processing/core/PGraphics.java
@@ -292,29 +299,29 @@ public class App extends PApplet {
         normal(0, 0, 1);
         vertex(x1, y1, z1, 0, 0); // upperleft
         vertex(x2, y1, z1, 1, 0); // upperright
-        vertex(x2, y2, z1, 1, h/50); // lowerright
-        vertex(x1, y2, z1, 0, h/50); // lowerleft
+        vertex(x2, y2, z1, 1, h/BLOCK_SIZE); // lowerright
+        vertex(x1, y2, z1, 0, h/BLOCK_SIZE); // lowerleft
 
         // right
         normal(1, 0, 0);
         vertex(x2, y1, z1, 0, 0); // upperleft
         vertex(x2, y1, z2, 1, 0); // upperright
-        vertex(x2, y2, z2, 1, h/50); // lowerright
-        vertex(x2, y2, z1, 0, h/50); // lowerleft
+        vertex(x2, y2, z2, 1, h/BLOCK_SIZE); // lowerright
+        vertex(x2, y2, z1, 0, h/BLOCK_SIZE); // lowerleft
 
         // back
         normal(0, 0, -1);
         vertex(x2, y1, z2, 0, 0); // upperleft
         vertex(x1, y1, z2, 1, 0); // upperright
-        vertex(x1, y2, z2, 1, h/50); // lowerright
-        vertex(x2, y2, z2, 0, h/50); // lowerleft
+        vertex(x1, y2, z2, 1, h/BLOCK_SIZE); // lowerright
+        vertex(x2, y2, z2, 0, h/BLOCK_SIZE); // lowerleft
 
         // left
         normal(-1, 0, 0);
         vertex(x1, y1, z2, 0, 0); // upperleft
         vertex(x1, y1, z1, 1, 0); // upperright
-        vertex(x1, y2, z1, 1, h/50); // lowerright
-        vertex(x1, y2, z2, 0, h/50); // lowerleft
+        vertex(x1, y2, z1, 1, h/BLOCK_SIZE); // lowerright
+        vertex(x1, y2, z2, 0, h/BLOCK_SIZE); // lowerleft
 
         // top
         normal(0, 1, 0);
@@ -333,6 +340,30 @@ public class App extends PApplet {
         endShape();
     }
 
+    /**
+     * modded based on https://github.com/processing/processing/blob/4cc297c66908899cd29480c202536ecf749854e8/core/src/processing/core/PGraphics.java
+     * 
+     * @param lerpProgress [0.0, 1.0] 0.0 for facing right, 1.0 for facing left
+     * @param image texture image
+     */
+    public void drawMario(float lerpProgress, PImage image) {
+        float x1 = -BLOCK_SIZE/2; float x2 = BLOCK_SIZE/2;
+        float y1 = -BLOCK_SIZE/2; float y2 = BLOCK_SIZE/2;
+
+
+        beginShape(QUADS);
+        texture(image);
+
+        // front
+        normal(0, 0, 1);
+        vertex(lerp(x1, x2, 1-lerpProgress), y1, 0, 0, 0); // upperleft
+        vertex(lerp(x1, x2, lerpProgress), y1, 0, 1, 0); // upperright
+        vertex(lerp(x1, x2, lerpProgress), y2, 0, 1, 1); // lowerright
+        vertex(lerp(x1, x2, 1-lerpProgress), y2, 0, 0, 1); // lowerleft
+
+        endShape();
+    }
+
 
     public void draw() {
         // don't use resetMatrix to start. It clears the modelView matrix, which
@@ -341,7 +372,8 @@ public class App extends PApplet {
         // beginning of draw.
 
         background(0);
-        stroke(255);
+        // stroke(255);
+        noStroke();
 
         pollKeys();
 
@@ -368,14 +400,14 @@ public class App extends PApplet {
         pushMatrix();
    
 
-        for (int i = 0; i < floorDepth; i++) {
+        for (int i = 0; i < FLOOR_DEPTH; i++) {
             popMatrix();
             pushMatrix();
-            translate(0, 0, -50 * i);
+            translate(0, 0, -BLOCK_SIZE * i);
  
-            for (int j = 0; j < floorLength; j++) {
-                int ij = i * floorDepth + j;
-                int h = 50;
+            for (int j = 0; j < FLOOR_LENGTH; j++) {
+                int ij = i * FLOOR_DEPTH + j;
+                int h = BLOCK_SIZE;
                 fill(floorcolor.get(ij)[0], floorcolor.get(ij)[1], floorcolor.get(ij)[2]);
                 // fill(50);
 
@@ -384,18 +416,18 @@ public class App extends PApplet {
                         h *= pillar[2];
                 }
 
-                if (h != 50)
+                if (h != BLOCK_SIZE)
                 {
                     pushMatrix();
-                    translate(0, -(h - 50) / 2, 0);
-                    textureBox(50, h, 50, pillar);
+                    translate(0, -(h - BLOCK_SIZE) / 2, 0);
+                    textureBox(BLOCK_SIZE, h, BLOCK_SIZE, pillar);
                     popMatrix();
                 }
                 else
                 {
-                    textureBox(50, h, 50, brick);
+                    textureBox(BLOCK_SIZE, h, BLOCK_SIZE, brick);
                 }
-                translate(50, 0, 0);
+                translate(BLOCK_SIZE, 0, 0);
             }
         }
         
@@ -403,16 +435,59 @@ public class App extends PApplet {
         popMatrix();
 
 
+        if (abs(xSpeed) > 0.5)
+        {
+            facingRight = xSpeed >= 0;
+        }
+
+        jumping = isJumping();
+
+
         // interactive character
-        // TODO: character frame based animation
         pushMatrix();
+        
+        translate(300 +xPos, -BLOCK_SIZE -yPos, 0 -zPos);
+        
+        // TODO: character frame based animation
+        // stroke(255, 0, 0);
+        // fill(255);
+        // box(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        lerpProgress += facingRight ? +10 : -10;
+        lerpProgress = constrain(lerpProgress, 0, 100);
+        
+        PImage mario;
 
-        translate(300 +xPos, -50 -yPos, 0 -zPos);
+        if (jumping)
+        {
+            mario = marioJump;
+            marioWalkIndex = 0;
+        }
+        else
+        {
+            if (abs(xSpeed) > 0.2)
+            {
+                mario = marioWalk[marioWalkIndex];
 
-        stroke(255, 0, 0);
-        fill(255);
-        box(50, 50, 50);
+                if (millis() - marioWalkAnimationTimer >= 250)
+                {
+                    marioWalkIndex = ++marioWalkIndex % 3;
+                    marioWalkAnimationTimer = millis();
+                }
+            }
+            else
+            {
+                marioWalkIndex = 0;
+                mario = marioStatic;
+            }
+        }
+
+        drawMario(lerpProgress /100f, mario);
 
         popMatrix();
+    }
+
+    boolean isJumping()
+    {
+        return yPos > 1;
     }
 }
